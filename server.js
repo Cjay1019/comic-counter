@@ -1,7 +1,10 @@
 const express = require("express");
 const path = require("path");
+const dotenv = require("dotenv")
+dotenv.config()
 const app = express();
 const PORT = process.env.PORT;
+console.log(PORT)
 
 // // Define middleware here
 app.use(express.json({ limit: "50mb" }));

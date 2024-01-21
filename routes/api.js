@@ -1,4 +1,3 @@
-const axios = require("axios");
 const lofcg = require("../leagueofcomicgeeks/index");
 
 module.exports = function (app) {
