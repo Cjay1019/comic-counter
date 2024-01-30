@@ -1,14 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import useSkipFirstRender from "../hooks/useSkipFirstRender";
 import axios from "axios";
-import FlipNumbers from "react-flip-numbers";
-import { Container, Grow, List, ListItem, Paper, Typography } from "@mui/material";
+import { Button, Container, Dialog, DialogTitle, Grow, List, ListItem, Paper, TextField, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import CheckIcon from '@mui/icons-material/Check';
-import ClearIcon from '@mui/icons-material/Clear';
+import CheckIcon from "@mui/icons-material/Check";
+import ClearIcon from "@mui/icons-material/Clear";
+import Flipper from "../components/Flipper";
 
 export default function Home() {
     const theme = useTheme();
+    const didMountRef = useRef(false);
+    const [userId, setUserId] = useState("");
+    const [startCount, setStartCount] = useState("");
     const [readCount, setReadCount] = useState(0);
+    const [showDialog, setShowDialog] = useState(false);
+    const [showDataList, setShowDataList] = useState(false);
     const [loading, setLoading] = useState(true);
     const [onPace, setOnPace] = useState(false);
     const [flippingDone, setFlippingDone] = useState(false);
@@ -36,18 +42,28 @@ export default function Home() {
     const daysInYear = Math.ceil((nextNewYears.getTime() - newYears.getTime()) / 86400000);
 
     useEffect(() => {
-        axios.get("/api/getReadCount").then(res => {
-            setReadCount(res.data.readCount);
-            setLoading(false);
-        }).catch(err => console.error(err));
+        const items = JSON.parse(localStorage.getItem("items")) || {};
+        items.userId && setUserId(items.userId);
+        items.startCount && setStartCount(items.startCount);
+
+        if (items.userId && items.startCount) {
+            setShowDataList(true);
+            getReadCount(items);
+        } else {
+            setShowDialog(true);
+        }
     }, []);
 
-    useEffect(() => {
+    useSkipFirstRender(() => {
+        setLoading(false);
         setOnPace(getPace() >= daysInYear);
+    }, [readCount]);
+
+    useSkipFirstRender(() => {
         setTimeout(() => {
             setFlippingDone(true);
         }, 2000);
-    }, [readCount]);
+    }, [onPace]);
 
     const getFlippingNumber = (value) => readCount === 0 ? "000" : loading ? "000" : value.toString();
 
@@ -55,69 +71,79 @@ export default function Home() {
 
     const getPaceIcon = () => onPace ? <CheckIcon color="success" /> : <ClearIcon color="error" />;
 
-    return (
-        <Container maxWidth="xs">
+    const saveDisabled = () => (!userId || !startCount);
+
+    const getReadCount = (items) => {
+        axios.post("/api/getReadCount", items).then(res => {
+            setReadCount(res.data.readCount);
+        }).catch(err => console.error(err));
+    }
+
+    const saveUserInfo = () => {
+        localStorage.setItem("items", JSON.stringify({ userId, startCount}));
+        setShowDialog(false);
+        setShowDataList(true);
+        getReadCount({ userId, startCount});
+    }
+
+    const renderDataList = () => (
             <Paper sx={styles.paper}>
                 <List>
                     <ListItem>
                         <Typography style={styles.text}>Read:&nbsp;</Typography>
-                        <FlipNumbers
-                            height={styles.text.fontSize}
-                            width={styles.text.fontSize - 10}
-                            color={styles.numbers.color}
-                            numberStyle={{fontFamily: styles.numbers.fontFamily}}
-                            perspective={400}
-                            play
-                            duration={loading ? 4 : 2}
-                            numbers={getFlippingNumber(readCount)}
+                        <Flipper
+                            loading={loading}
+                            getFlippingNumber={getFlippingNumber}
+                            flipNumber={readCount}
                         />
                     </ListItem>
                     <ListItem>
                         <Typography style={styles.text}>Days In:&nbsp;</Typography>
-                        <FlipNumbers
-                            height={styles.text.fontSize}
-                            width={styles.text.fontSize - 10}
-                            color={styles.numbers.color}
-                            numberStyle={{fontFamily: styles.numbers.fontFamily}}
-                            perspective={400}
-                            play
-                            duration={loading ? 4 : 2}
-                            numbers={getFlippingNumber(daysIn)}
+                        <Flipper
+                            loading={loading}
+                            getFlippingNumber={getFlippingNumber}
+                            flipNumber={daysIn}
                         />
                     </ListItem>
                     <ListItem>
                         <Typography style={styles.text}>Days Remaining:&nbsp;</Typography>
-                        <FlipNumbers
-                            height={styles.text.fontSize}
-                            width={styles.text.fontSize - 10}
-                            color={styles.numbers.color}
-                            numberStyle={{fontFamily: styles.numbers.fontFamily}}
-                            perspective={400}
-                            play
-                            duration={loading ? 4 : 2}
-                            numbers={getFlippingNumber(daysInYear - daysIn)}
+                        <Flipper
+                            loading={loading}
+                            getFlippingNumber={getFlippingNumber}
+                            flipNumber={daysInYear - daysIn}
                         />
                     </ListItem>
                     <ListItem>
                         <Typography style={styles.text}>Pace:&nbsp;</Typography>
-                        <FlipNumbers
-                            height={styles.text.fontSize}
-                            width={styles.text.fontSize - 10}
-                            color={styles.numbers.color}
-                            numberStyle={{fontFamily: styles.numbers.fontFamily}}
-                            perspective={400}
-                            play
-                            duration={loading ? 4 : 2}
-                            numbers={getFlippingNumber(getPace())}
+                        <Flipper
+                            loading={loading}
+                            getFlippingNumber={getFlippingNumber}
+                            flipNumber={getPace()}
                         />&nbsp;
                         <Grow in={flippingDone} style={{ transformOrigin: '0 0 0' }}
                         {...(flippingDone ? { timeout: 1000 } : {})}>
                             {flippingDone ? getPaceIcon() : <></>}
-                        </Grow>
-                        
+                        </Grow>                        
                     </ListItem>
                 </List>
             </Paper>
+    );
+
+    return (
+        <Container maxWidth="xs">
+            <Dialog open={showDialog}>
+                <DialogTitle>Enter your information</DialogTitle>
+                    <List>
+                        <ListItem>
+                            <TextField label="User Id" variant="outlined" value={userId} onChange={e => setUserId(e.target.value)} />                
+                        </ListItem>
+                        <ListItem>
+                            <TextField label="Starting Count" variant="outlined" value={startCount} onChange={e => setStartCount(e.target.value)} />                
+                        </ListItem>
+                    </List>
+                <Button variant="contained" disabled={saveDisabled()} onClick={saveUserInfo}>Save</Button>
+            </Dialog>
+            {showDataList && renderDataList()}
         </Container>
     );
 }
