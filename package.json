@@ -8,7 +8,7 @@
     "react": "cd client && npm start",
     "dev": "run-p server react",
     "prod": "cross-env NODE_ENV=production nodemon server.js",
-    "react-build": "cd client && npm run build",
+    "react-build": "cd client && npm i && npm run build",
     "start": "run-p react-build prod"
   },
   "keywords": [],
