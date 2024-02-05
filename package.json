@@ -7,9 +7,7 @@
     "server": "node-env-run server.js --exec nodemon",
     "react": "cd client && npm start",
     "dev": "run-p server react",
-    "prod": "cross-env NODE_ENV=production nodemon server.js",
-    "react-build": "cd client && npm i && npm run build",
-    "start": "run-p react-build prod"
+    "start": "cross-env NODE_ENV=production nodemon server.js"
   },
   "keywords": [],
   "author": "",
