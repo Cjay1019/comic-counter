@@ -3,5 +3,3 @@ sudo su
 cd /var/app/current/client
 npm i
 npm run build
-cd /var/app/current/leagueofcomicgeeks
-npm i
