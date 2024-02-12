@@ -1,5 +1,6 @@
 const _ = require("lodash");
 const queryString = require("query-string");
+const dotenv = require("dotenv");
 const request = require("./request");
 const authentication = require("./authentication");
 const extractDataFrom = require("./extract-data-from");
@@ -74,7 +75,7 @@ const getList = function(userId, listId, parameters, options, callback) {
     arrayFormat: "bracket"
   });
 
-  const proxy = `http://cjay1019:15ow15ow@165.22.10.93:3128`;
+  const proxy = process.env.PROXY_URL;
   const url = `${getComicsUrl}?${urlParameterString}`;
   request.get({uri: url, proxy}, (error, response, body) => {
     if (error) {
