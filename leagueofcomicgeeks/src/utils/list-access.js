@@ -74,8 +74,9 @@ const getList = function(userId, listId, parameters, options, callback) {
     arrayFormat: "bracket"
   });
 
+  const proxy = `http://cjay1019:15ow15ow@165.22.10.93:3128`;
   const url = `${getComicsUrl}?${urlParameterString}`;
-  request.get(url, (error, response, body) => {
+  request.get({uri: url, proxy}, (error, response, body) => {
     if (error) {
       return callback(error);
     }
