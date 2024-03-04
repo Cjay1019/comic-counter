@@ -12,8 +12,8 @@ phases:
       - cd .. && aws s3 cp --recursive --acl public-read ./client/build/. s3://$BUCKET_NAME/comic-counter/
       - aws s3 cp --acl public-read --cache-control="max-age=0, no-cache, no-store, must-revalidate" ./client/build/index.html s3://$BUCKET_NAME/comic-counter/index.html
       - aws cloudfront create-invalidation --distribution-id $DIST_ID --paths /index.html
-      - cd lambdas && npm install --omit=dev
-      - cp getReadCount.mjs index.mjs
+      - cd lambdas/leagueofcomicgeeks && npm install --omit=dev
+      - cd .. && cp getReadCount.mjs index.mjs
       - zip code.zip index.mjs node_modules -r
       - aws lambda update-function-code --function-name $GET_READ_COUNT_ARN --zip-file fileb://code.zip
 artifacts:
