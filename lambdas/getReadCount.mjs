@@ -1,4 +1,4 @@
-import * as lofcg from "../leagueofcomicgeeks/index.js";
+import * as lofcg from "./leagueofcomicgeeks/index.js";
 
 export async function handler(event, context) {
     console.log(event.body);
