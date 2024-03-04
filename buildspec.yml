@@ -8,7 +8,9 @@ phases:
   pre_build:
     commands:
       - npm install --omit=dev
-      - aws s3 cp --recursive --acl public-read ./client/build/. s3://$BUCKET_NAME/comic-counter/
+      - cd client && npm install
+      - npm run build
+      - cd .. && aws s3 cp --recursive --acl public-read ./client/build/. s3://$BUCKET_NAME/comic-counter/
       - aws s3 cp --acl public-read --cache-control="max-age=0, no-cache, no-store, must-revalidate" ./client/build/index.html s3://$BUCKET_NAME/comic-counter/index.html
       - aws cloudfront create-invalidation --distribution-id $DIST_ID --paths /index.html
       - cp lambdas/getReadCount.mjs index.mjs
