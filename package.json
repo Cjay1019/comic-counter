@@ -1,23 +1,23 @@
 {
   "name": "comics",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "main": "server.mjs",
   "scripts": {
-    "server": "node-env-run server.js --exec nodemon",
+    "server": "node-env-run server.mjs --exec nodemon",
     "react": "cd client && npm start",
     "dev": "run-p server react",
-    "start": "cross-env NODE_ENV=production nodemon server.js"
+    "start": "cross-env NODE_ENV=production nodemon server.mjs"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Conner Leigh",
   "license": "ISC",
   "dependencies": {
+    "leagueofcomicgeeks": "^1.1.0"
+  },
+  "devDependencies": {
     "axios": "^1.6.5",
     "cross-env": "^7.0.3",
     "dotenv": "^16.3.2",
     "express": "^4.18.2",
-    "leagueofcomicgeeks": "^1.1.0",
     "node-env-run": "^4.0.2",
     "npm-run-all": "^4.1.5"
   }
