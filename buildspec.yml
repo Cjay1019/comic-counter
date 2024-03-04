@@ -15,7 +15,7 @@ phases:
       - aws cloudfront create-invalidation --distribution-id $DIST_ID --paths /index.html
       - cp lambdas/getReadCount.mjs index.mjs
       - zip code.zip index.mjs node_modules -r
-      - aws lambda update-function-code --function-name  $CONTACT_ME_ARN --zip-file fileb://code.zip
+      - aws lambda update-function-code --function-name $CONTACT_ME_ARN --zip-file fileb://code.zip
 artifacts:
   files:
     - "**/*"
