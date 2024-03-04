@@ -1,6 +1,5 @@
 const _ = require("lodash");
 const queryString = require("query-string");
-const dotenv = require("dotenv");
 const request = require("./request");
 const authentication = require("./authentication");
 const extractDataFrom = require("./extract-data-from");
