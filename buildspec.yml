@@ -14,7 +14,7 @@ phases:
       - aws cloudfront create-invalidation --distribution-id $DIST_ID --paths /index.html
       - cd lambdas/leagueofcomicgeeks && npm install --omit=dev
       - cd .. && cp getReadCount.mjs index.mjs
-      - zip code.zip index.mjs node_modules -r
+      - zip code.zip index.mjs leagueofcomicgeeks -r
       - aws lambda update-function-code --function-name $GET_READ_COUNT_ARN --zip-file fileb://code.zip
 artifacts:
   files:
