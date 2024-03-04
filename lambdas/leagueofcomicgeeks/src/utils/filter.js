@@ -1,3 +1,3 @@
 module.exports = {
-  FIRST_ISSUES: "firsts"
-};
+    FIRST_ISSUES: "firsts"
+  };

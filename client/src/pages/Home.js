@@ -74,7 +74,8 @@ export default function Home() {
     const saveDisabled = () => (!userId || !startCount);
 
     const getReadCount = (items) => {
-        axios.post("/api/getReadCount", items).then(res => {
+        const config = { headers: { "Content-Type": "text/plain" }};
+        axios.post("/api/getReadCount", JSON.stringify(items), config).then(res => {
             setReadCount(res.data.readCount);
         }).catch(err => console.error(err));
     }

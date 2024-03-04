@@ -1,15 +1,7 @@
 const _ = require("lodash");
 const cheerio = require("cheerio");
-const moment = require("moment");
 const config = require("../../config");
 const sort = require("./sort");
-
-const convertToISO8601Date = function(dateString) {
-  if (_.isEmpty(dateString)) return "";
-  const date = moment(dateString, "MMM Do, YYYY");
-  if (!date.isValid()) return "";
-  return date.format("YYYY-MM-DD");
-};
 
 const sortList = function(list, sortBy = sort.ASCENDING) {
   if (sortBy === sort.ASCENDING || sortBy === sort.DESCENDING) {
@@ -25,60 +17,6 @@ const sortList = function(list, sortBy = sort.ASCENDING) {
     return _.orderBy(list, "userMetrics.consensusRating", "desc");
   }
   return list;
-};
-
-const buildSeriesUrl = function(id, coverUrl) {
-  const slug = coverUrl.match(/\/\d+-(.+)\./)[1];
-  return `/comics/series/${id}/${slug}`;
-};
-
-const seriesExtractor = function(response, options) {
-  const $ = cheerio.load(response.list);
-
-  const extractSeriesData = function() {
-    const $el = $(this);
-    const id = $el.find(".name a").attr("data-id");
-    const name = $el
-      .find(".name a")
-      .text()
-      .trim();
-    const cover = $el
-      .find(".cover img")
-      .attr("data-original")
-      .split("?")[0];
-    const publisher = $el
-      .find(".publisher")
-      .text()
-      .trim();
-    const count = parseInt(
-      $el
-        .find(".details")
-        .text()
-        .trim(),
-      10
-    );
-    const series = $el
-      .find(".series")
-      .text()
-      .trim();
-
-    return {
-      id,
-      name,
-      url: config.rootUrl + buildSeriesUrl(id, cover),
-      cover: config.rootUrl + cover,
-      publisher,
-      count,
-      series
-    };
-  };
-
-  return sortList(
-    $("li")
-      .map(extractSeriesData)
-      .get(),
-    options.sort
-  );
 };
 
 const getVote = (piece, boundary) =>
@@ -147,53 +85,13 @@ const issueExtractor = function(response, options) {
       .find(".title a")
       .attr("href")
       .trim();
-    const [, id, variantId = null] = url.match(
-      /comic\/(\d+)\/.+?(?:\?variant=(\d+))?$/
-    );
     const name = $el
       .find(".title a")
       .text()
       .trim();
-    const cover = $el
-      .find(".comic-cover-art img")
-      .attr("data-src")
-      .split("?")[0];
-    const diamondSku =
-      $el
-        .find(".comic-diamond-sku")
-        .text()
-        .trim() || null;
-    const { consensusRating, pickOfTheWeekRating } = getVotes($el);
-    const { pulled, added } = getCollectionStats($, $el);
-
-    const comicDetails = $el
-      .find(".comic-details")
-      .text()
-      .split("·");
-    const publisher = (comicDetails[0] || "").trim();
-    const releaseDate = convertToISO8601Date((comicDetails[1] || "").trim());
-    const price = (comicDetails[2] || "").trim();
-
-    const $description = $el.find(".comic-description p");
-    $description.find("a").remove();
-    const description = $description.text().trim();
     return {
-      id,
-      variantId,
-      url: config.rootUrl + url,
-      name,
-      cover: cover.includes("no-cover") ? null : config.rootUrl + cover,
-      publisher,
-      description,
-      releaseDate,
-      price,
-      diamondSku,
-      userMetrics: {
-        pulled,
-        added,
-        consensusRating,
-        pickOfTheWeekRating
-      }
+      url,
+      name
     };
   };
 
@@ -206,7 +104,6 @@ const issueExtractor = function(response, options) {
 };
 
 const extractionHandler = {
-  series: seriesExtractor,
   issue: issueExtractor
 };
 

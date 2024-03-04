@@ -1,51 +1,12 @@
 const _ = require("lodash");
 const queryString = require("query-string");
 const request = require("./request");
-const authentication = require("./authentication");
 const extractDataFrom = require("./extract-data-from");
 const getPublisherIds = require("./get-publisher-ids");
 const filter = require("./filter");
 const config = require("../../config");
 
-const myListUrl = "/comic/my_list_move";
 const getComicsUrl = "/comic/get_comics";
-
-const modifyList = function(
-  comicId,
-  listId,
-  actionId,
-  failureMessage,
-  callback
-) {
-  if (!authentication.isAuthenticated()) {
-    callback(new Error("Not authenticated"));
-    return;
-  }
-
-  const data = {
-    comic_id: comicId,
-    list_id: listId,
-    action_id: actionId
-  };
-
-  request.post({ uri: myListUrl, form: data }, (error, response, body) => {
-    if (error) {
-      return callback(error);
-    }
-
-    if (_.isNaN(parseInt(body, 10))) {
-      return callback(new Error(failureMessage));
-    }
-
-    if (response && response.statusCode !== 200) {
-      return callback(
-        new Error(`Unexpected status code ${response.statusCode}`)
-      );
-    }
-
-    return callback(null);
-  });
-};
 
 const getList = function(userId, listId, parameters, options, callback) {
   const viewType = {
@@ -103,20 +64,6 @@ const getList = function(userId, listId, parameters, options, callback) {
   });
 };
 
-const addToList = function(comicId, listId, callback) {
-  const actionId = 1;
-  const failureMessage = "Unable to add comic to list";
-  return modifyList(comicId, listId, actionId, failureMessage, callback);
-};
-
-const removeFromList = function(comicId, listId, callback) {
-  const actionId = 0;
-  const failureMessage = "Unable to remove comic from list";
-  return modifyList(comicId, listId, actionId, failureMessage, callback);
-};
-
 module.exports = {
-  get: getList,
-  add: addToList,
-  remove: removeFromList
+  get: getList
 };
