@@ -8,7 +8,12 @@ module.exports = function(listId) {
     return accessList.get(userId, listId, parameters, options, callback);
   };
 
+  const getReadProfile = function(userName, callback) {
+    return accessList.getProfile(userName, callback);
+  };
+
   return {
-    get: optionalOptions(getList)
+    get: optionalOptions(getList),
+    getProfile: getReadProfile
   };
 };

@@ -1,12 +1,12 @@
 const _ = require("lodash");
 const queryString = require("query-string");
 const request = require("./request");
-const extractDataFrom = require("./extract-data-from");
-const getPublisherIds = require("./get-publisher-ids");
+const cheerio = require("cheerio");
 const filter = require("./filter");
 const config = require("../../config");
 
 const getComicsUrl = "/comic/get_comics";
+const getProfileUrl = "/profile/";
 
 const getList = function(userId, listId, parameters, options, callback) {
   const viewType = {
@@ -22,12 +22,9 @@ const getList = function(userId, listId, parameters, options, callback) {
   const urlParameters = _.extend(
     {
       list: listId,
-      list_option: type,
+      list_mode: type,
       list_refinement: listRefinement,
-      user_id: userId,
-      view: viewType[type] || "thumbs",
-      order: options.sort || "alpha-asc",
-      publisher: getPublisherIds(options.publishers)
+      user_id: userId
     },
     parameters
   );
@@ -37,6 +34,15 @@ const getList = function(userId, listId, parameters, options, callback) {
 
   const proxy = process.env.PROXY_URL;
   const url = `${getComicsUrl}?${urlParameterString}`;
+  makeRequest(url, proxy, callback).then(count => {
+      callback(null, count);
+  });
+};
+
+getRead = function(userName, callback) {
+  const proxy = process.env.PROXY_URL;
+  const url = `${getProfileUrl}${userName}`;
+
   request.get({uri: url, proxy}, (error, response, body) => {
     if (error) {
       return callback(error);
@@ -48,22 +54,53 @@ const getList = function(userId, listId, parameters, options, callback) {
       );
     }
 
-    let responseJson;
-    try {
-      responseJson = JSON.parse(body);
-    } catch (e) {
-      return callback(new Error("Unable to parse response"));
-    }
+    const $ = cheerio.load(body);
+    const countString = 
+      $('a:contains("Read List")')
+      .eq(0)
+      .find(".badge")
+      .text();
 
-    if (!_.isObject(responseJson) || !_.isString(responseJson.list)) {
-      return callback(new Error("Unknown response format"));
-    }
-
-    const list = extractDataFrom(responseJson, options);
-    return callback(null, list);
+    callback(null, parseInt(countString, 10));
   });
-};
+}
+
+const makeRequest = (url, proxy, callback, count = 0, lazy = false) => new Promise((resolve, reject) => {
+    if (lazy) {
+      url = url + `&list_extend=1&list_mode_offset=${count}`;
+    }
+
+    request.get({uri: url, proxy}, (error, response, body) => {
+      if (error) {
+        return callback(error);
+      }
+  
+      if (response && response.statusCode !== 200) {
+        return callback(
+          new Error(`Unexpected status code ${response.statusCode}`)
+        );
+      }
+  
+      let responseJson;
+      try {
+        responseJson = JSON.parse(body);
+      } catch (e) {
+        return callback(new Error("Unable to parse response"));
+      }
+  
+      if (!_.isObject(responseJson) || !_.isString(responseJson.list)) {
+        return callback(new Error("Unknown response format"));
+      }
+
+      if (responseJson.count < 1) {
+        return resolve(count);
+      } else {
+       resolve(makeRequest(url, proxy, callback, count + responseJson.count, true));
+      }
+    });
+  });
 
 module.exports = {
-  get: getList
+  get: getList,
+  getProfile: getRead
 };

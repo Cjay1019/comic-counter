@@ -10,7 +10,7 @@ import Flipper from "../components/Flipper";
 export default function Home() {
     const theme = useTheme();
     const didMountRef = useRef(false);
-    const [userId, setUserId] = useState("");
+    const [userName, setUserName] = useState("");
     const [startCount, setStartCount] = useState("");
     const [readCount, setReadCount] = useState(0);
     const [showDialog, setShowDialog] = useState(false);
@@ -43,10 +43,10 @@ export default function Home() {
 
     useEffect(() => {
         const items = JSON.parse(localStorage.getItem("items")) || {};
-        items.userId && setUserId(items.userId);
+        items.userName && setUserName(items.userName);
         items.startCount && setStartCount(items.startCount);
 
-        if (items.userId && items.startCount) {
+        if (items.userName && items.startCount) {
             setShowDataList(true);
             getReadCount(items);
         } else {
@@ -71,7 +71,7 @@ export default function Home() {
 
     const getPaceIcon = () => onPace ? <CheckIcon color="success" /> : <ClearIcon color="error" />;
 
-    const saveDisabled = () => (!userId || !startCount);
+    const saveDisabled = () => (!userName || !startCount);
 
     const getReadCount = (items) => {
         const config = { headers: { "Content-Type": "text/plain" }};
@@ -81,10 +81,10 @@ export default function Home() {
     }
 
     const saveUserInfo = () => {
-        localStorage.setItem("items", JSON.stringify({ userId, startCount}));
+        localStorage.setItem("items", JSON.stringify({ userName, startCount}));
         setShowDialog(false);
         setShowDataList(true);
-        getReadCount({ userId, startCount});
+        getReadCount({ userName, startCount});
     }
 
     const renderDataList = () => (
@@ -136,7 +136,7 @@ export default function Home() {
                 <DialogTitle>Enter your information</DialogTitle>
                     <List>
                         <ListItem>
-                            <TextField label="User Id" variant="outlined" value={userId} onChange={e => setUserId(e.target.value)} />                
+                            <TextField label="User Id" variant="outlined" value={userName} onChange={e => setUserName(e.target.value)} />                
                         </ListItem>
                         <ListItem>
                             <TextField label="Starting Count" variant="outlined" value={startCount} onChange={e => setStartCount(e.target.value)} />                

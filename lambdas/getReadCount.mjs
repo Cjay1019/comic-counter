@@ -5,7 +5,7 @@ export async function handler(event, context) {
     const data = JSON.parse(event.body);
 
     const response = await new Promise((resolve) => {
-        lofcg.readList.get(data.userId, { type: lofcg.types.ISSUE }, function (err, results) {
+        lofcg.readList.getProfile(data.userName, function (err, results) {
             if (err) {
                 console.error(err);
                 resolve(0);
@@ -15,7 +15,7 @@ export async function handler(event, context) {
                 results = []
             }
             
-            resolve({ readCount: results.length - data.startCount});
+            resolve({ readCount: results - data.startCount});
         });
     });
 
