@@ -16,7 +16,7 @@ export default function Home() {
     const [showDialog, setShowDialog] = useState(false);
     const [showDataList, setShowDataList] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [onPace, setOnPace] = useState(false);
+    const [onPace, setOnPace] = useState(null);
     const [flippingDone, setFlippingDone] = useState(false);
 
     const styles = {
@@ -56,7 +56,7 @@ export default function Home() {
 
     useSkipFirstRender(() => {
         setLoading(false);
-        setOnPace(getPace() >= daysInYear);
+        setOnPace(getPace() >= 1000);
     }, [readCount]);
 
     useSkipFirstRender(() => {
