@@ -59,7 +59,8 @@ getRead = function(userName, callback) {
       $('a:contains("Read List")')
       .eq(0)
       .find(".badge")
-      .text();
+      .text()
+      .replace(",", "");
 
     callback(null, parseInt(countString, 10));
   });
